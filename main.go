@@ -22,16 +22,6 @@ func main() {
 	// iris init
 	app := iris.New()
 
-	// to support graceful shutdown, iris support to catch a Interrupt
-	iris.RegisterOnInterrupt(func() {
-		log.Printf("shutdown airbridge-go-stat-udl-io")
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
-		defer cancel()
-
-		app.Shutdown(ctx)
-	})
-
 	// package tcplisten provides customizeable TCP net.Listener with various
 	// performance-related options
 	listenerConfig := tcplisten.Config{
@@ -45,6 +35,24 @@ func main() {
 		log.Fatalf("could not open socket from tcplisten: %v", err)
 	}
 
-	_, err = webapp.NewWebApp(app, config.Kafka.BrokerList)
+	wa, err := webapp.NewWebApp(app, config.Kafka.BrokerList)
+	if err != nil {
+		log.Fatalf("could not allocate a WebApp: %v", err)
+	}
+
+	// to support graceful shutdown, iris support to catch a Interrupt
+	iris.RegisterOnInterrupt(func() {
+		log.Printf("shutdown airbridge-go-stat-udl-io")
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+		defer cancel()
+
+		if err := wa.Close(); err != nil {
+			log.Printf("close error: %v", err)
+		}
+
+		app.Shutdown(ctx)
+	})
+
 	app.Run(iris.Listener(listener), iris.WithoutInterruptHandler)
 }

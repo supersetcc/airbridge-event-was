@@ -24,3 +24,7 @@ func NewWebApp(app *iris.Application, brokers []string) (*WebApp, error) {
 
 	return webapp, nil
 }
+
+func (webapp *WebApp) Close() error {
+	return webapp.producer.Close()
+}
