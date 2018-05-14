@@ -1,0 +1,8 @@
+profile: production
+
+kafka_broker_list:
+  - '000.kafka.cluster.airbucket.ab180.co:6667'
+  - '001.kafka.cluster.airbucket.ab180.co:6667'
+  - '002.kafka.cluster.airbucket.ab180.co:6667'
+  - '003.kafka.cluster.airbucket.ab180.co:6667'
+  - '004.kafka.cluster.airbucket.ab180.co:6667'
