@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
@@ -13,9 +14,8 @@ const (
 
 type Config struct {
 	Kafka struct {
-		BrokerList   []string `yaml:"kafka_broker_list"`
-		ProduceTopic string   `yaml:"kafka_produce_topic"`
-	}
+		BrokerList []string `yaml:"broker_list"`
+	} `yaml:"kafka"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -25,8 +25,12 @@ func LoadConfig() (*Config, error) {
 	}
 
 	config := Config{}
-	if err := yaml.Unmarshal(stream, config); err != nil {
+	if err := yaml.Unmarshal(stream, &config); err != nil {
 		return nil, err
+	}
+
+	if len(config.Kafka.BrokerList) == 0 {
+		return nil, fmt.Errorf("kafka brokers must over than one")
 	}
 
 	return &config, nil
