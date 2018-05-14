@@ -6,7 +6,6 @@ import (
 
 func WriteError(ic iris.Context, code int, message string, hint string) {
 	ic.StatusCode(code)
-	ic.Header("Content-Type", "application/json; chatset=utf-8")
 	ic.Header("Cache-Control", "no-cache")
 	ic.Header("Pragma", "no-cache")
 
@@ -16,6 +15,14 @@ func WriteError(ic iris.Context, code int, message string, hint string) {
 		"hint":          hint,
 		"at":            at,
 	}
+
+	ic.JSON(response)
+}
+
+func WriteResponse(ic iris.Context, response interface{}) {
+	ic.StatusCode(200)
+	ic.Header("Cache-Control", "no-cache")
+	ic.Header("Pragma", "no-cache")
 
 	ic.JSON(response)
 }

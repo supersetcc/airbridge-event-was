@@ -209,11 +209,12 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 		Value: sarama.ByteEncoder(encoded),
 	}
 
-	response := MobileEventResponse{}
-	response.ResultMessage = fmt.Sprintf("Event(%d) is successfully proccessed.", eventCategory)
-	response.Resource = new(map[string]string)
-	response.At = TimeToStr(KSTNow())
-	ic.JSON(response)
+	response := MobileEventResponse{
+		ResultMessage: fmt.Sprintf("Event(%d) is successfully proccessed.", eventCategory),
+		Resource:      new(map[string]string),
+		At:            TimeToStr(KSTNow()),
+	}
+	WriteResponse(ic, response)
 }
 
 func (app *WebApp) HandleUnsupportedMethod(ic iris.Context) {
