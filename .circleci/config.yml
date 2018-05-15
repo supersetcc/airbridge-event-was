@@ -1,0 +1,38 @@
+version: 2
+branches:
+  only:
+    - master
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.10.0
+
+    working_directory: /go/src/bitbucket.org/teamteheranslippers/airbridge-go-bypass-was
+    steps:
+      - checkout
+      - run:
+          name: Application Build
+          command: go build
+      - run:
+          name: Application Test
+          command: go test
+      - run:
+          name: Install AWS CLI for Deploy
+          command: |
+            curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+            unzip awscli-bundle.zip
+            sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+      - run:
+          name: Deploy
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              export AWS_ACCESS_KEY_ID="AKIAIVTLB4GLYIXP4IRA"
+              export AWS_SECRET_ACCESS_KEY="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"
+              export AWS_DEFAULT_REGION="ap-northeast-1"
+              aws deploy push --application-name airbridge-go-bypass-was \
+              --s3-location s3://airbridge-application-source/airbridge-go-bypass-was \
+              --source ~/repo
+              aws deploy create-deployment --application-name airbridge-go-bypass-was \
+              --s3-location bucket=airbridge-application-source,key=airbridge-go-bypass-was,bundleType=zip \
+              --deployment-group-name airbridge-go-bypass-was-group
+            fi

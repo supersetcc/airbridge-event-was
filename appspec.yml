@@ -1,0 +1,16 @@
+version: 0.0
+os: linux
+files:
+  - source: ./airbridge-go-stat-udl-io
+    destination: /var/www/airbridge-go-bypass-was
+  - source: ./res
+    destination: /var/www/airbridge-go-bypass-was
+hooks:
+  BeforeInstall:
+    - location: res/deploy/before-install.sh
+      timeout: 120
+      runas: root
+  AfterInstall:
+    - location: res/deploy/after-install.sh
+      timeout: 120
+      runas: root%                                                                                                                                                   (feature/ABR-167)⚡ %                                                                                                                  ~/workspace/ab180/stat-udl-io
