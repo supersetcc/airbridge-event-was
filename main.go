@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	webapp "bitbucket.org/teamteheranslippers/airbridge-go-stat-udl-io/webapp"
+	webapp "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/webapp"
 	iris "github.com/kataras/iris"
 	tcplisten "github.com/valyala/tcplisten"
 )
@@ -42,7 +42,7 @@ func main() {
 
 	// to support graceful shutdown, iris support to catch a Interrupt
 	iris.RegisterOnInterrupt(func() {
-		log.Printf("shutdown airbridge-go-stat-udl-io")
+		log.Printf("shutdown airbridge-go-bypass-was")
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 		defer cancel()

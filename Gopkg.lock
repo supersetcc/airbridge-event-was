@@ -31,12 +31,6 @@
   revision = "b565731e1464263de0bda75f2e45d97b54b60110"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/bradfitz/gomemcache"
-  packages = ["memcache"]
-  revision = "1952afaa557dc08e8e0d89eafab110fb501c1a2b"
-
-[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -80,12 +74,6 @@
   name = "github.com/flosch/pongo2"
   packages = ["."]
   revision = "e7cf9ea5ca9c574f3fd5f83f7eed4a6162a67dea"
-
-[[projects]]
-  name = "github.com/go-sql-driver/mysql"
-  packages = ["."]
-  revision = "a0583e0143b1624142adab07e0e97fe106d99561"
-  version = "v1.3"
 
 [[projects]]
   branch = "master"
@@ -324,6 +312,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "70e1d6e9b30740a9557017211ff775d6b57ee9336f667de124deffa1c4f14237"
+  inputs-digest = "87faca01de907e4d2023d02103f80e2a6195f5346572af70f0505cc0fc4e2721"
   solver-name = "gps-cdcl"
   solver-version = 1
