@@ -1,9 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: ./airbridge-go-stat-udl-io
-    destination: /var/www/airbridge-go-bypass-was
-  - source: ./res
+  - source: /
     destination: /var/www/airbridge-go-bypass-was
 hooks:
   BeforeInstall:
