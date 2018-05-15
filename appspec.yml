@@ -11,4 +11,4 @@ hooks:
   AfterInstall:
     - location: res/deploy/after-install.sh
       timeout: 120
-      runas: root%                                                                                                                                                   (feature/ABR-167)⚡ %                                                                                                                  ~/workspace/ab180/stat-udl-io
+      runas: root
