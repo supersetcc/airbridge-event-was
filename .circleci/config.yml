@@ -11,7 +11,7 @@ jobs:
       - checkout
       - run:
           name: Application Build
-          command: go build
+          command: GOOS=linux go build
       - run:
           name: Application Test
           command: go test
