@@ -7,10 +7,11 @@ import (
 
 type WebApp struct {
 	producer common.MessageProducer
+	logging  common.Logging
 }
 
-func NewWebApp(app *iris.Application, mp common.MessageProducer) (*WebApp, error) {
-	webapp := &WebApp{mp}
+func NewWebApp(app *iris.Application, mp common.MessageProducer, logging common.Logging) (*WebApp, error) {
+	webapp := &WebApp{mp, logging}
 	app.Post("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleMobileEventReceiver)
 
 	// handle unsupported method

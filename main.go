@@ -41,7 +41,12 @@ func main() {
 		log.Fatalf("could not open kafka producer: %v", err)
 	}
 
-	wa, err := webapp.NewWebApp(app, mp)
+	logger, err := common.NewLoggingNewrelic("", "")
+	if err != nil {
+		log.Fatalf("could not open LoggingNewrelic: %v", err)
+	}
+
+	wa, err := webapp.NewWebApp(app, mp, logger)
 	if err != nil {
 		log.Fatalf("could not allocate a WebApp: %v", err)
 	}

@@ -117,28 +117,41 @@ func GetOSVersion(event MobileEvent) string {
 }
 
 func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
+	txn, err := app.logging.NewTransaction()
+	defer txn.End()
+
+	if err != nil {
+		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, "newrelic error")
+	}
+
 	request := ic.Request()
 
 	// Authorization Header
 	authorization := request.Header.Get(AUTHORIZATION)
 	if authorization == "" {
+		txn.AddAttribute("status", 401)
 		WriteError(ic, 401, EXCEPTION_MSG_AUTHORIZATION, "")
 		return
 	}
 
 	rawData, err := ioutil.ReadAll(ic.Request().Body)
 	if err != nil {
+		txn.NoticeError(err)
+		txn.AddAttribute("status", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
 
 	if len(rawData) == 0 {
+		txn.AddAttribute("status", 400)
 		WriteError(ic, 400, EXCEPTION_MSG_VALIDATION, "missing body")
 		return
 	}
 
 	logUUID, err := uuid.NewV4()
 	if err != nil {
+		txn.NoticeError(err)
+		txn.AddAttribute("status", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -149,18 +162,27 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 
 	appName := ic.Params().Get(APP_NAME)
 	if appName == "" {
+		txn.AddAttribute("status", 400)
 		WriteError(ic, 400, EXCEPTION_MSG_VALIDATION, "missing 'app_name'")
 		return
 	}
 
+	txn.AddAttribute("appName", appName)
+
 	eventCategory, err := ic.Params().GetInt(EVENT_CATEGORY)
 	if err != nil {
+		txn.NoticeError(err)
+		txn.AddAttribute("status", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
 
+	txn.AddAttribute("eventCategory", eventCategory)
+
 	decoded := map[string]interface{}{}
 	if err := json.Unmarshal(rawData, &decoded); err != nil {
+		txn.NoticeError(err)
+		txn.AddAttribute("status", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -172,6 +194,8 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 
 	mobileEvent := MobileEvent{}
 	if err := json.Unmarshal(rawData, &mobileEvent); err != nil {
+		txn.NoticeError(err)
+		txn.AddAttribute("status", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -198,11 +222,15 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 
 	encoded, err := json.Marshal(payload)
 	if err != nil {
+		txn.NoticeError(err)
+		txn.AddAttribute("status", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
 
 	if err := app.producer.Publish("airbridge-raw-events", pk, encoded); err != nil {
+		txn.NoticeError(err)
+		txn.AddAttribute("status", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -213,6 +241,8 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 		At:            TimeToStr(KSTNow()),
 	}
 	WriteResponse(ic, response)
+
+	txn.AddAttribute("status", 200)
 }
 
 func (app *WebApp) HandleUnsupportedMethod(ic iris.Context) {

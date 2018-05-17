@@ -40,3 +40,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/valyala/tcplisten"
+
+[[constraint]]
+  name = "github.com/newrelic/go-agent"
+  version = "2.0.0"
