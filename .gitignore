@@ -13,3 +13,9 @@
 
 # vim
 *.sw?
+
+# mac cache file
+.DS_Store
+
+# binary file
+airbridge-go-bypass-was
