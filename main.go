@@ -31,7 +31,7 @@ func main() {
 		FastOpen:    true,
 	}
 
-	listener, err := listenerConfig.NewListener("tcp4", ":8080")
+	listener, err := listenerConfig.NewListener("tcp4", ":80")
 	if err != nil {
 		log.Fatalf("could not open socket from tcplisten: %v", err)
 	}
