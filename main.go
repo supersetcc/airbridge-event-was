@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	common "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/common"
 	webapp "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/webapp"
 	iris "github.com/kataras/iris"
 	tcplisten "github.com/valyala/tcplisten"
@@ -35,7 +36,12 @@ func main() {
 		log.Fatalf("could not open socket from tcplisten: %v", err)
 	}
 
-	wa, err := webapp.NewWebApp(app, config.Kafka.BrokerList)
+	mp, err := common.NewKafkaMessageProducer(config.Kafka.BrokerList)
+	if err != nil {
+		log.Fatalf("could not open kafka producer: %v", err)
+	}
+
+	wa, err := webapp.NewWebApp(app, mp)
 	if err != nil {
 		log.Fatalf("could not allocate a WebApp: %v", err)
 	}

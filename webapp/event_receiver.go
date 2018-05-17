@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"reflect"
 
-	sarama "github.com/Shopify/sarama"
 	iris "github.com/kataras/iris"
 	uuid "github.com/satori/go.uuid"
 )
@@ -203,10 +202,9 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 		return
 	}
 
-	app.producer.producer.Input() <- &sarama.ProducerMessage{
-		Topic: "airbridge-raw-events",
-		Key:   sarama.StringEncoder(pk),
-		Value: sarama.ByteEncoder(encoded),
+	if err := app.producer.Publish("airbridge-raw-events", pk, encoded); err != nil {
+		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
+		return
 	}
 
 	response := MobileEventResponse{

@@ -1,18 +1,16 @@
 package webapp
 
-import "github.com/kataras/iris"
+import (
+	"bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/common"
+	"github.com/kataras/iris"
+)
 
 type WebApp struct {
-	producer *MessageProducer
+	producer common.MessageProducer
 }
 
-func NewWebApp(app *iris.Application, brokers []string) (*WebApp, error) {
-	producer, err := NewMessageProducer(brokers)
-	if err != nil {
-		return nil, err
-	}
-
-	webapp := &WebApp{producer}
+func NewWebApp(app *iris.Application, mp common.MessageProducer) (*WebApp, error) {
+	webapp := &WebApp{mp}
 	app.Post("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleMobileEventReceiver)
 
 	// handle unsupported method
