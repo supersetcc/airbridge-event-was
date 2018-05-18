@@ -14,7 +14,7 @@ jobs:
           command: GOOS=linux go build
       - run:
           name: Application Test
-          command: go test
+          command: go test ./...
       - run:
           name: Install AWS CLI for Deploy
           command: |
