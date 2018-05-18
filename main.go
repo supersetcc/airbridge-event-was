@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	common "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/common"
@@ -15,7 +17,8 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	// config
-	config, err := LoadConfig()
+	production := os.Getenv("USE_AIRBRIDGE_LOCAL_DB") != ""
+	config, err := LoadConfig(production)
 	if err != nil {
 		log.Fatalf("could not config load: %v", err)
 	}
@@ -31,7 +34,7 @@ func main() {
 		FastOpen:    true,
 	}
 
-	listener, err := listenerConfig.NewListener("tcp4", ":80")
+	listener, err := listenerConfig.NewListener("tcp4", fmt.Sprintf(":%d", config.Server.Port))
 	if err != nil {
 		log.Fatalf("could not open socket from tcplisten: %v", err)
 	}

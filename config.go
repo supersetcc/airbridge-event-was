@@ -21,10 +21,19 @@ type Config struct {
 		License string `yaml:"license"`
 		AppName string `yaml:"app_name"`
 	} `yaml:"newrelic"`
+
+	Server struct {
+		Port int `yaml:"server"`
+	} `yaml:"port"`
 }
 
-func LoadConfig() (*Config, error) {
-	stream, err := ioutil.ReadFile(PRODUCTION_PATH)
+func LoadConfig(production bool) (*Config, error) {
+	configPath := DEVELOP_PATH
+	if production {
+		configPath = PRODUCTION_PATH
+	}
+
+	stream, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return nil, err
 	}
