@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"reflect"
 
 	iris "github.com/kataras/iris"
@@ -228,8 +227,6 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
-
-	log.Print(string(encoded))
 
 	if err := app.producer.Publish("airbridge-raw-events", pk, encoded); err != nil {
 		txn.NoticeError(err)
