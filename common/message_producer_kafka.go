@@ -17,6 +17,8 @@ type MessageProducerKafka struct {
 func NewMessageProducerKafka(brokers []string) (*MessageProducerKafka, error) {
 	// enable errors and notifications
 	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+	config.Producer.Return.Errors = true
 	config.Producer.RequiredAcks = sarama.WaitForLocal
 	config.Producer.Compression = sarama.CompressionSnappy
 	config.Producer.Flush.Frequency = 500 * time.Millisecond
