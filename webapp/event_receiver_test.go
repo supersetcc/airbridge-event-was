@@ -124,3 +124,6 @@ func TestAppIDMustGetNullValue(t *testing.T) {
 
 func TestDataResponseMustNotContainClientIP(t *testing.T) {
 }
+
+func TestCheckDataResponseFormat(t *testing.T) {
+}
