@@ -65,11 +65,11 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 		defer cancel()
 
+		app.Shutdown(ctx)
+
 		if err := wa.Close(); err != nil {
 			log.Printf("close error: %v", err)
 		}
-
-		app.Shutdown(ctx)
 	})
 
 	app.Run(iris.Listener(listener), iris.WithoutInterruptHandler)
