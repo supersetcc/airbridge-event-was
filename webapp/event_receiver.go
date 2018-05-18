@@ -22,7 +22,7 @@ type EventLogKwargs struct {
 type EventLog struct {
 	WhatToDo      string         `json:"what_to_do"`
 	LogUUID       string         `json:"log_uuid"`
-	RecvTimestamp int64          `json:"recv_timestampp"`
+	RecvTimestamp int64          `json:"recv_timestamp"`
 	Kwargs        EventLogKwargs `json:"kwargs"`
 }
 
