@@ -19,7 +19,7 @@ type Config struct {
 
 	Newrelic struct {
 		License string `yaml:"license"`
-		AppName string `yaml:app_name`
+		AppName string `yaml:"app_name"`
 	} `yaml:"newrelic"`
 }
 
