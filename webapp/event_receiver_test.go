@@ -2,6 +2,7 @@ package webapp
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -12,11 +13,20 @@ import (
 	"github.com/kataras/iris/httptest"
 )
 
+const (
+	TestRequestDataPath = "../res/test/mobile_event_request_data.txt"
+)
+
 type MockMessageProducer struct {
 	IsClosed                  bool
 	LastPublishedTopic        string
 	LastPublishedPartitionKey string
 	LastPublishedPayload      []byte
+}
+
+type MockEventReceiverLog struct {
+	WhatToDo string                 `json:"what_to_do"`
+	Kwargs   map[string]interface{} `json:"kwargs"`
 }
 
 func (p *MockMessageProducer) Publish(topic, pk string, payload []byte) error {
@@ -60,11 +70,10 @@ func TestMockMobileEventRequestWithAuthorized(t *testing.T) {
 }
 
 func TestMockMobileEventRequestBasic(t *testing.T) {
-	path := "../res/test/mobile_event_request_data.txt"
-	file, err := os.Open(path)
+	file, err := os.Open(TestRequestDataPath)
 	defer file.Close()
 	if err != nil {
-		t.Fatalf("could not open test data(%s): %v", path, err)
+		t.Fatalf("could not open test data(%s): %v", TestRequestDataPath, err)
 	}
 
 	scanner := bufio.NewScanner(file)
@@ -80,5 +89,37 @@ func TestMockMobileEventRequestBasic(t *testing.T) {
 		if mp.LastPublishedTopic != "airbridge-raw-events" {
 			t.Fatalf("publish is not sent to 'airbrdige-raw-events' but %v", mp.LastPublishedTopic)
 		}
+	}
+}
+
+func TestAppIDMustNullValueBeforeGoOut(t *testing.T) {
+	file, err := os.Open(TestRequestDataPath)
+	defer file.Close()
+	if err != nil {
+		t.Fatalf("could not open test data(%s): %v", TestRequestDataPath, err)
+	}
+
+	scanner := bufio.NewScanner(file)
+	if scanner.Scan() != true {
+		t.Fatalf("could not extract test data from %s", TestRequestDataPath)
+	}
+
+	expect, mp := MakeWebAppExpect(t)
+	uri := fmt.Sprintf("/api/v2/apps/%s/events/mobile-app/%d", "ablog", 9162)
+
+	request := expect.POST(uri).WithHeader("Authorization", "random-authorized-string")
+	payload := scanner.Text()
+	request.WithText(payload)
+	request.Expect().Status(httptest.StatusOK)
+
+	var log MockEventReceiverLog
+	err = json.Unmarshal(mp.LastPublishedPayload, &log)
+	if err != nil {
+		t.Fatalf("could not parse queueing message: %v", err)
+	}
+
+	fmt.Println(string(mp.LastPublishedPayload))
+	if log.Kwargs["app_id"] != nil {
+		t.Fatalf("kwargs['app_id'] must have null value")
 	}
 }

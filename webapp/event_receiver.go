@@ -11,9 +11,8 @@ import (
 )
 
 type EventLogKwargs struct {
-	AppID         string      `json:"app_id"`
+	AppID         *string     `json:"app_id"`
 	AppName       string      `json:"app_name"`
-	ClientIP      string      `json:"client_ip"`
 	EventCategory int         `json:"event_category"`
 	DeviceUUID    string      `json:"device_uuid"`
 	Data          interface{} `json:"data"`
@@ -129,7 +128,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	// Authorization Header
 	authorization := request.Header.Get(AUTHORIZATION)
 	if authorization == "" {
-		txn.AddAttribute("status", 401)
+		txn.AddAttribute("http-response-status-code", 401)
 		WriteError(ic, 401, EXCEPTION_MSG_AUTHORIZATION, "")
 		return
 	}
@@ -137,13 +136,13 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	rawData, err := ioutil.ReadAll(ic.Request().Body)
 	if err != nil {
 		txn.NoticeError(err)
-		txn.AddAttribute("status", 500)
+		txn.AddAttribute("http-response-status-code", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
 
 	if len(rawData) == 0 {
-		txn.AddAttribute("status", 400)
+		txn.AddAttribute("http-response-status-code", 400)
 		WriteError(ic, 400, EXCEPTION_MSG_VALIDATION, "missing body")
 		return
 	}
@@ -151,7 +150,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	logUUID, err := uuid.NewV4()
 	if err != nil {
 		txn.NoticeError(err)
-		txn.AddAttribute("status", 500)
+		txn.AddAttribute("http-response-status-code", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -159,10 +158,11 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	// extract IP address from X-Forwared-For
 	xForwardedString := request.Header.Get(X_FORWARDED_FOR)
 	clientIP := ParseClientIPFromXForwarededFor(xForwardedString)
+	txn.AddAttribute("clientIP", clientIP)
 
 	appName := ic.Params().Get(APP_NAME)
 	if appName == "" {
-		txn.AddAttribute("status", 400)
+		txn.AddAttribute("http-response-status-code", 400)
 		WriteError(ic, 400, EXCEPTION_MSG_VALIDATION, "missing 'app_name'")
 		return
 	}
@@ -172,7 +172,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	eventCategory, err := ic.Params().GetInt(EVENT_CATEGORY)
 	if err != nil {
 		txn.NoticeError(err)
-		txn.AddAttribute("status", 500)
+		txn.AddAttribute("http-response-status-code", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -182,7 +182,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	decoded := map[string]interface{}{}
 	if err := json.Unmarshal(rawData, &decoded); err != nil {
 		txn.NoticeError(err)
-		txn.AddAttribute("status", 500)
+		txn.AddAttribute("http-response-status-code", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -195,7 +195,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	mobileEvent := MobileEvent{}
 	if err := json.Unmarshal(rawData, &mobileEvent); err != nil {
 		txn.NoticeError(err)
-		txn.AddAttribute("status", 500)
+		txn.AddAttribute("http-response-status-code", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -205,7 +205,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 		LogUUID:       logUUID.String(),      // log_uuid
 		RecvTimestamp: CurrentTimestamp(),    // recv_timestamp
 		Kwargs: EventLogKwargs{
-			AppID:         "$$",
+			AppID:         nil,
 			AppName:       appName,
 			Data:          decoded, // data
 			EventCategory: eventCategory,
@@ -223,14 +223,14 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	encoded, err := json.Marshal(payload)
 	if err != nil {
 		txn.NoticeError(err)
-		txn.AddAttribute("status", 500)
+		txn.AddAttribute("http-response-status-code", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
 
 	if err := app.producer.Publish("airbridge-raw-events", pk, encoded); err != nil {
 		txn.NoticeError(err)
-		txn.AddAttribute("status", 500)
+		txn.AddAttribute("http-response-status-code", 500)
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -242,7 +242,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	}
 	WriteResponse(ic, response)
 
-	txn.AddAttribute("status", 200)
+	txn.AddAttribute("http-response-status-code", 200)
 }
 
 func (app *WebApp) HandleUnsupportedMethod(ic iris.Context) {

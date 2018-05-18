@@ -1,5 +1,8 @@
 profile: production
 
+server:
+  port: 80
+
 kafka:
   broker_list:
     - "000.kafka.cluster.airbucket.ab180.co:6667"
