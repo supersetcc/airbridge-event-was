@@ -245,7 +245,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 
 	txn.AddAttribute("http-response-status-code", 200)
 
-	log.Printf("[%s][200] app: %s, event_category: %d", clientIP, appName, eventCategory)
+	log.Printf("[200][%s] app: %s, event_category: %d", clientIP, appName, eventCategory)
 }
 
 func (app *WebApp) HandleUnsupportedMethod(ic iris.Context) {

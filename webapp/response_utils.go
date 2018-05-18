@@ -20,7 +20,7 @@ func WriteError(ic iris.Context, code int, message string, hint string) {
 
 	ic.JSON(response)
 
-	log.Printf("[ERROR][%d] %s:%s", code, message, hint)
+	log.Printf("[%d] %s:%s", code, message, hint)
 }
 
 func WriteResponse(ic iris.Context, response interface{}) {
