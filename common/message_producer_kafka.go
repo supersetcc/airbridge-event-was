@@ -9,12 +9,12 @@ import (
 )
 
 // KafkaProducer struct definition
-type KafkaMessageProducer struct {
+type MessageProducerKafka struct {
 	producer sarama.AsyncProducer
 	wg       *sync.WaitGroup
 }
 
-func NewKafkaMessageProducer(brokers []string) (*KafkaMessageProducer, error) {
+func NewMessageProducerKafka(brokers []string) (*MessageProducerKafka, error) {
 	// enable errors and notifications
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForLocal
@@ -36,15 +36,15 @@ func NewKafkaMessageProducer(brokers []string) (*KafkaMessageProducer, error) {
 		}
 	}(wg)
 
-	return &KafkaMessageProducer{producer, wg}, nil
+	return &MessageProducerKafka{producer, wg}, nil
 }
 
-func (m *KafkaMessageProducer) Close() error {
+func (m *MessageProducerKafka) Close() error {
 	defer m.wg.Wait()
 	return m.producer.Close()
 }
 
-func (m *KafkaMessageProducer) Publish(topic, partitionKey string, message []byte) error {
+func (m *MessageProducerKafka) Publish(topic, partitionKey string, message []byte) error {
 	msg := sarama.ProducerMessage{
 		Topic: topic,
 		Key:   sarama.StringEncoder(partitionKey),

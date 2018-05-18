@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/common"
 	"github.com/iris-contrib/httpexpect"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/httptest"
@@ -33,7 +34,12 @@ func (p *MockMessageProducer) Close() error {
 func MakeWebAppExpect(t *testing.T) (*httpexpect.Expect, *MockMessageProducer) {
 	app := iris.New()
 	mp := &MockMessageProducer{false, "", "", nil}
-	_, err := NewWebApp(app, mp)
+	logging, err := common.NewLoggingDebug()
+	if err != nil {
+		t.Fatalf("could not get LoggingDebug: %v", err)
+	}
+
+	_, err = NewWebApp(app, mp, logging)
 	if err != nil {
 		t.Fatalf("could not allocate a webapp: %v", err)
 	}

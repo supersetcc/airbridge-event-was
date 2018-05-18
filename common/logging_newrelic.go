@@ -4,6 +4,8 @@ import newrelic "github.com/newrelic/go-agent"
 
 type LoggingNewrelic struct {
 	newrelic.Application
+
+	AppName string
 }
 
 func NewLoggingNewrelic(appName, license string) (*LoggingNewrelic, error) {
@@ -13,10 +15,10 @@ func NewLoggingNewrelic(appName, license string) (*LoggingNewrelic, error) {
 		return nil, err
 	}
 
-	return &LoggingNewrelic{app}, nil
+	return &LoggingNewrelic{app, appName}, nil
 }
 
 func (logging *LoggingNewrelic) NewTransaction() (newrelic.Transaction, error) {
-	transaction := logging.StartTransaction("airbrdige-go-bypass", nil, nil)
+	transaction := logging.StartTransaction(logging.AppName, nil, nil)
 	return transaction, nil
 }

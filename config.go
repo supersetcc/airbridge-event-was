@@ -16,6 +16,11 @@ type Config struct {
 	Kafka struct {
 		BrokerList []string `yaml:"broker_list"`
 	} `yaml:"kafka"`
+
+	Newrelic struct {
+		License string `yaml:"license"`
+		AppName string `yaml:app_name`
+	} `yaml:"newrelic"`
 }
 
 func LoadConfig() (*Config, error) {

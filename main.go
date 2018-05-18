@@ -36,12 +36,12 @@ func main() {
 		log.Fatalf("could not open socket from tcplisten: %v", err)
 	}
 
-	mp, err := common.NewKafkaMessageProducer(config.Kafka.BrokerList)
+	mp, err := common.NewMessageProducerKafka(config.Kafka.BrokerList)
 	if err != nil {
 		log.Fatalf("could not open kafka producer: %v", err)
 	}
 
-	logger, err := common.NewLoggingNewrelic("", "")
+	logger, err := common.NewLoggingNewrelic(config.Newrelic.AppName, config.Newrelic.License)
 	if err != nil {
 		log.Fatalf("could not open LoggingNewrelic: %v", err)
 	}

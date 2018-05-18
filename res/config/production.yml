@@ -7,3 +7,7 @@ kafka:
     - "002.kafka.cluster.airbucket.ab180.co:6667"
     - "003.kafka.cluster.airbucket.ab180.co:6667"
     - "004.kafka.cluster.airbucket.ab180.co:6667"
+
+newrelic:
+  app_name: go-bypass-was
+  license: 71e44e93d8c06135f83ad5c36a9c42c98e75a6ea
