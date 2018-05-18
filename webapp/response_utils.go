@@ -29,6 +29,4 @@ func WriteResponse(ic iris.Context, response interface{}) {
 	ic.Header("Pragma", "no-cache")
 
 	ic.JSON(response)
-
-	log.Printf("[200][%s] app: %s, event_category: %d", clientIP, appName, eventCategory)
 }
