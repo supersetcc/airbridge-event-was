@@ -8,5 +8,5 @@ kafka:
     - "127.0.0.1:9092"
 
 newrelic:
-  app_name: ""
-  license: ""
+  app_name: go-bypass-was
+  license: 71e44e93d8c06135f83ad5c36a9c42c98e75a6ea

@@ -92,7 +92,7 @@ func TestMockMobileEventRequestBasic(t *testing.T) {
 	}
 }
 
-func TestAppIDMustNullValueBeforeGoOut(t *testing.T) {
+func TestAppIDMustGetNullValue(t *testing.T) {
 	file, err := os.Open(TestRequestDataPath)
 	defer file.Close()
 	if err != nil {
@@ -100,26 +100,27 @@ func TestAppIDMustNullValueBeforeGoOut(t *testing.T) {
 	}
 
 	scanner := bufio.NewScanner(file)
-	if scanner.Scan() != true {
-		t.Fatalf("could not extract test data from %s", TestRequestDataPath)
+	for scanner.Scan() {
+		expect, mp := MakeWebAppExpect(t)
+		uri := fmt.Sprintf("/api/v2/apps/%s/events/mobile-app/%d", "ablog", 9162)
+
+		request := expect.POST(uri).WithHeader("Authorization", "random-authorized-string")
+		payload := scanner.Text()
+		request.WithText(payload)
+		request.Expect().Status(httptest.StatusOK)
+
+		var log MockEventReceiverLog
+		err = json.Unmarshal(mp.LastPublishedPayload, &log)
+		if err != nil {
+			t.Fatalf("could not parse queueing message: %v", err)
+		}
+
+		fmt.Println(string(mp.LastPublishedPayload))
+		if log.Kwargs["app_id"] != nil {
+			t.Fatalf("kwargs['app_id'] must have null value")
+		}
 	}
+}
 
-	expect, mp := MakeWebAppExpect(t)
-	uri := fmt.Sprintf("/api/v2/apps/%s/events/mobile-app/%d", "ablog", 9162)
-
-	request := expect.POST(uri).WithHeader("Authorization", "random-authorized-string")
-	payload := scanner.Text()
-	request.WithText(payload)
-	request.Expect().Status(httptest.StatusOK)
-
-	var log MockEventReceiverLog
-	err = json.Unmarshal(mp.LastPublishedPayload, &log)
-	if err != nil {
-		t.Fatalf("could not parse queueing message: %v", err)
-	}
-
-	fmt.Println(string(mp.LastPublishedPayload))
-	if log.Kwargs["app_id"] != nil {
-		t.Fatalf("kwargs['app_id'] must have null value")
-	}
+func TestDataResponseMustNotContainClientIP(t *testing.T) {
 }

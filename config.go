@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	PRODUCTION_PATH = "res/config/production.yml"
-	DEVELOP_PATH    = "res/config/develop.yml"
+	PRODUCTION_PATH = "./res/config/production.yml"
+	DEVELOP_PATH    = "./res/config/develop.yml"
 )
 
 type Config struct {
@@ -23,8 +23,8 @@ type Config struct {
 	} `yaml:"newrelic"`
 
 	Server struct {
-		Port int `yaml:"server"`
-	} `yaml:"port"`
+		Port int `yaml:"port`
+	} `yaml:"server`
 }
 
 func LoadConfig(production bool) (*Config, error) {
@@ -45,6 +45,10 @@ func LoadConfig(production bool) (*Config, error) {
 
 	if len(config.Kafka.BrokerList) == 0 {
 		return nil, fmt.Errorf("kafka brokers must over than one")
+	}
+
+	if config.Server.Port == 0 {
+		return nil, fmt.Errorf("server port is not setted")
 	}
 
 	return &config, nil

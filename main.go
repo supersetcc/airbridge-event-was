@@ -17,7 +17,11 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	// config
-	production := os.Getenv("USE_AIRBRIDGE_LOCAL_DB") != ""
+	production := len(os.Getenv("USE_AIRBRIDGE_LOCAL_DB")) == 0
+	if production == true {
+		log.Printf("running on production environment")
+	}
+
 	config, err := LoadConfig(production)
 	if err != nil {
 		log.Fatalf("could not config load: %v", err)
@@ -44,6 +48,7 @@ func main() {
 		log.Fatalf("could not open kafka producer: %v", err)
 	}
 
+	log.Printf("app name: %s, license: %s", config.Newrelic.AppName, config.Newrelic.License)
 	logger, err := common.NewLoggingNewrelic(config.Newrelic.AppName, config.Newrelic.License)
 	if err != nil {
 		log.Fatalf("could not open LoggingNewrelic: %v", err)
