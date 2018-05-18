@@ -229,6 +229,8 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 		return
 	}
 
+	log.Print(string(encoded))
+
 	if err := app.producer.Publish("airbridge-raw-events", pk, encoded); err != nil {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
