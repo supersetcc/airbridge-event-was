@@ -48,7 +48,6 @@ func main() {
 		log.Fatalf("could not open kafka producer: %v", err)
 	}
 
-	log.Printf("app name: %s, license: %s", config.Newrelic.AppName, config.Newrelic.License)
 	logger, err := common.NewLoggingNewrelic(config.Newrelic.AppName, config.Newrelic.License)
 	if err != nil {
 		log.Fatalf("could not open LoggingNewrelic: %v", err)
