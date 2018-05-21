@@ -127,3 +127,11 @@ func TestDataResponseMustNotContainClientIP(t *testing.T) {
 
 func TestCheckDataResponseFormat(t *testing.T) {
 }
+
+func TestReqestPayloadLessThan512Bytes(t *testing.T) {
+	uri := fmt.Sprintf("/api/v2/apps/%s/events/mobile-app/%d", "ablog", 9162)
+	expect, _ := MakeWebAppExpect(t)
+	request := expect.POST(uri).WithHeader("Authorization", "random-auth-data")
+	request.WithText("{}")
+	request.Expect().Status(httptest.StatusOK)
+}
