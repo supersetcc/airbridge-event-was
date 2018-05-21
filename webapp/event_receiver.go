@@ -139,8 +139,17 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
 		txn.AddAttribute("errer-stmt", err.Error())
+
+		if len(rawData) > 0 {
+			txn.AddAttribute("http-request-payload", string(rawData))
+		}
+
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
+	}
+
+	if len(rawData) > 0 {
+		txn.AddAttribute("http-request-payload", string(rawData))
 	}
 
 	if len(rawData) == 0 {
