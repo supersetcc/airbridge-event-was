@@ -138,6 +138,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	if err != nil {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
+		txn.AddAttribute("errer-stmt", err.Error())
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -152,6 +153,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	if err != nil {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
+		txn.AddAttribute("errer-stmt", err.Error())
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -174,6 +176,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	if err != nil {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
+		txn.AddAttribute("errer-stmt", err.Error())
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -184,6 +187,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	if err := json.Unmarshal(rawData, &decoded); err != nil {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
+		txn.AddAttribute("errer-stmt", err.Error())
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -197,6 +201,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	if err := json.Unmarshal(rawData, &mobileEvent); err != nil {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
+		txn.AddAttribute("errer-stmt", err.Error())
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -225,6 +230,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	if err != nil {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
+		txn.AddAttribute("errer-stmt", err.Error())
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -232,6 +238,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	if err := app.producer.Publish("airbridge-raw-events", pk, encoded); err != nil {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
+		txn.AddAttribute("errer-stmt", err.Error())
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
