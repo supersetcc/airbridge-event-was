@@ -12,6 +12,7 @@ type WebApp struct {
 
 func NewWebApp(app *iris.Application, mp common.MessageProducer, logging common.Logging) (*WebApp, error) {
 	webapp := &WebApp{mp, logging}
+	// handle mobile event
 	app.Post("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleMobileEventReceiver)
 
 	// handle unsupported method
@@ -20,6 +21,9 @@ func NewWebApp(app *iris.Application, mp common.MessageProducer, logging common.
 	app.Head("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleUnsupportedMethod)
 	app.Options("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleUnsupportedMethod)
 	app.Patch("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleUnsupportedMethod)
+
+	// handle health check
+	app.Get("/health-check", webapp.HandleHealthCheck)
 
 	return webapp, nil
 }
