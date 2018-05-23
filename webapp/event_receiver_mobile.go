@@ -12,65 +12,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-type EventLogKwargs struct {
-	AppID         *string     `json:"app_id"`
-	AppName       string      `json:"app_name"`
-	EventCategory int         `json:"event_category"`
-	DeviceUUID    string      `json:"device_uuid"`
-	Data          interface{} `json:"data"`
-}
-
-type EventLog struct {
-	WhatToDo      string         `json:"what_to_do"`
-	LogUUID       string         `json:"log_uuid"`
-	RecvTimestamp int64          `json:"recv_timestamp"`
-	Kwargs        EventLogKwargs `json:"kwargs"`
-}
-
-type MobileEvent struct {
-	SdkVersion       string `json:"sdkVersion"`
-	RequestTimestamp int    `json:"requestTimestamp"`
-	EventTimestamp   int    `json:"eventTimestamp"`
-	EventUUID        string `json:"eventUUID"`
-
-	ClientData struct {
-		OSVersion  string `json:"osVersion"`
-		DeviceType string `json:"deviceType"`
-
-		DeferredKey struct {
-			DeviceType string `json:"deviceType"`
-			OSVersion  string `json:"osVersion"`
-		}
-	}
-
-	Device struct {
-		DeviceModel string `json:"deviceModel"`
-		DeviceUUID  string `json:"deviceUUID"`
-		OSName      string `json:"osName"`
-		OSVersion   string `json:"osVersion"`
-	} `json:"device"`
-
-	Browser struct {
-		ClientID string `json:"clientID"`
-	} `json:"browser"`
-
-	EventData struct {
-		TransactionID string `json:"transactionID"`
-		ShortID       string `json:"shortID"`
-
-		TrackingData struct {
-			Channel string            `json:"channel"`
-			Params  map[string]string `json:"params"`
-		} `json:"trackingData"`
-	} `json:"eventData"`
-}
-
-type MobileEventResponse struct {
-	ResultMessage string      `json:"resultMessage"`
-	Resource      interface{} `json:"resource"`
-	At            string      `json:"at"`
-}
-
 const (
 	EXCEPTION_MSG_VALIDATION    = "Invalid request. Please RTFM. :P"
 	EXCEPTION_MSG_GENERAL       = "Sorry. :( Your request was temporarily failed. This issue is reported to our log system. We will fix it as soon."
@@ -117,7 +58,7 @@ func GetOSVersion(event MobileEvent) string {
 	return ""
 }
 
-func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
+func (app *WebApp) HandleEventReceiverMobile(ic iris.Context) {
 	txn, err := app.logging.NewTransaction()
 	defer txn.End()
 
