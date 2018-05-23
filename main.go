@@ -9,6 +9,7 @@ import (
 
 	common "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/common"
 	webapp "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/webapp"
+	cors "github.com/iris-contrib/middleware/cors"
 	iris "github.com/kataras/iris"
 	tcplisten "github.com/valyala/tcplisten"
 )
@@ -37,6 +38,10 @@ func main() {
 		DeferAccept: true,
 		FastOpen:    true,
 	}
+
+	// allow all origins, disallow credentials
+	c := cors.New("*")
+	app.Use(c)
 
 	listener, err := listenerConfig.NewListener("tcp4", fmt.Sprintf(":%d", config.Server.Port))
 	if err != nil {

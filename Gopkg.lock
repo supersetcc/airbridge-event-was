@@ -124,6 +124,12 @@
   revision = "ebe99fcebbcedf6e7916320cce24c3e1832766ac"
 
 [[projects]]
+  name = "github.com/iris-contrib/middleware"
+  packages = ["cors"]
+  revision = "1060fbb0ce08a72c50c612e8e5bdc8076c28343d"
+  version = "v10"
+
+[[projects]]
   branch = "master"
   name = "github.com/json-iterator/go"
   packages = ["."]
@@ -292,6 +298,12 @@
   revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
 
 [[projects]]
+  name = "github.com/rs/cors"
+  packages = ["."]
+  revision = "feef513b9575b32f84bafa580aad89b011259019"
+  version = "v1.3.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/ryanuber/columnize"
   packages = ["."]
@@ -446,6 +458,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "567c267eb1fe7cf9c530f8a7a43b8ee4a6cd57d9de93f695058ee22dc50a3ff2"
+  inputs-digest = "7a779127cbf5ea3078968486c9ee62c4302cf240f74fc5572dc306cd58b649a9"
   solver-name = "gps-cdcl"
   solver-version = 1
