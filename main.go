@@ -45,7 +45,12 @@ func main() {
 	}
 
 	// allow all origins, allow methods: GET and POST
-	app.Use(cors.Default())
+	// crs := cors.New(cors.Options{
+	//   AllowedOrigins:   []string{"*"},
+	//   AllowCredentials: true,
+	// })
+	// app.UseGlobal(crs)
+	app.UseGlobal(cors.Default())
 
 	listener, err := listenerConfig.NewListener("tcp4", fmt.Sprintf(":%d", config.Server.Port))
 	if err != nil {
