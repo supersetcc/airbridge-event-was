@@ -19,10 +19,39 @@ type MockEventReceiverLog struct {
 	Kwargs   map[string]interface{} `json:"kwargs"`
 }
 
-func TestMockMobileEventRequestWithoutAhtorized(t *testing.T) {
+func readAllMockRequestPayload() []string {
+	res := []string{}
+
+	file, err := os.Open(TestRequestDataPath)
+	defer file.Close()
+
+	if err != nil {
+		return res
+	}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		res = append(res, scanner.Text())
+	}
+
+	return res
+}
+
+func TestMockMobileEventRequestWithoutAuthorized(t *testing.T) {
 	expect, _ := NewWebAppExpect(t)
 	uri := fmt.Sprintf("/api/v2/apps/%s/events/mobile-app/%d", "ablog", 9162)
 	expect.POST(uri).Expect().Status(httptest.StatusUnauthorized)
+}
+
+func TestMockWebAppEventRequestWithoutAuthorized(t *testing.T) {
+	payloads := readAllMockRequestPayload()
+	if len(payloads) == 0 {
+		t.Fatalf("could not read test data(%s)", TestRequestDataPath)
+	}
+
+	expect, _ := NewWebAppExpect(t)
+	uri := fmt.Sprintf("/api/v2/apps/%s/events/mobile-webapp/%d", "ablog", 9160)
+	expect.POST(uri).WithText(payloads[0]).Expect().Status(httptest.StatusOK)
 }
 
 func TestMockMobileEventRequestWithAuthorized(t *testing.T) {
@@ -32,19 +61,16 @@ func TestMockMobileEventRequestWithAuthorized(t *testing.T) {
 }
 
 func TestMockMobileEventRequestBasic(t *testing.T) {
-	file, err := os.Open(TestRequestDataPath)
-	defer file.Close()
-	if err != nil {
-		t.Fatalf("could not open test data(%s): %v", TestRequestDataPath, err)
+	payloads := readAllMockRequestPayload()
+	if len(payloads) == 0 {
+		t.Fatalf("could not read test data(%s)", TestRequestDataPath)
 	}
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
+	for _, payload := range payloads {
 		expect, mp := NewWebAppExpect(t)
 		uri := fmt.Sprintf("/api/v2/apps/%s/events/mobile-app/%d", "ablog", 9162)
 
 		request := expect.POST(uri).WithHeader("Authorization", "random-authorized-string")
-		payload := scanner.Text()
 		request.WithText(payload)
 		request.Expect().Status(httptest.StatusOK)
 
@@ -55,24 +81,18 @@ func TestMockMobileEventRequestBasic(t *testing.T) {
 }
 
 func TestAppIDMustGetNullValue(t *testing.T) {
-	file, err := os.Open(TestRequestDataPath)
-	defer file.Close()
-	if err != nil {
-		t.Fatalf("could not open test data(%s): %v", TestRequestDataPath, err)
-	}
+	payloads := readAllMockRequestPayload()
+	for _, payload := range payloads {
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
 		expect, mp := NewWebAppExpect(t)
 		uri := fmt.Sprintf("/api/v2/apps/%s/events/mobile-app/%d", "ablog", 9162)
 
 		request := expect.POST(uri).WithHeader("Authorization", "random-authorized-string")
-		payload := scanner.Text()
 		request.WithText(payload)
 		request.Expect().Status(httptest.StatusOK)
 
 		var log MockEventReceiverLog
-		err = json.Unmarshal(mp.LastPublishedPayload, &log)
+		err := json.Unmarshal(mp.LastPublishedPayload, &log)
 		if err != nil {
 			t.Fatalf("could not parse queueing message: %v", err)
 		}
@@ -82,9 +102,6 @@ func TestAppIDMustGetNullValue(t *testing.T) {
 			t.Fatalf("kwargs['app_id'] must have null value")
 		}
 	}
-}
-
-func TestDataResponseMustNotContainClientIP(t *testing.T) {
 }
 
 func TestCheckDataResponseFormat(t *testing.T) {

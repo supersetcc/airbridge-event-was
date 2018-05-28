@@ -39,9 +39,8 @@ func main() {
 		FastOpen:    true,
 	}
 
-	// allow all origins, disallow credentials
-	c := cors.New("*")
-	app.Use(c)
+	// allow all origins, allow methods: GET and POST
+	app.Use(cors.Default())
 
 	listener, err := listenerConfig.NewListener("tcp4", fmt.Sprintf(":%d", config.Server.Port))
 	if err != nil {

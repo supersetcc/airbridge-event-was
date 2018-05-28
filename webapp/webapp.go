@@ -69,18 +69,51 @@ type MobileEventResponse struct {
 	At            string      `json:"at"`
 }
 
+func GetDeviceModel(event MobileEvent) string {
+	if event.Device.DeviceModel != "" {
+		return event.Device.DeviceModel
+	}
+
+	if event.ClientData.DeviceType != "" {
+		return event.ClientData.DeviceType
+	}
+
+	if event.ClientData.DeferredKey.DeviceType != "" {
+		return event.ClientData.DeferredKey.DeviceType
+	}
+
+	return ""
+}
+
+func GetOSVersion(event MobileEvent) string {
+	if event.Device.OSVersion != "" {
+		return event.Device.OSVersion
+	}
+
+	if event.ClientData.OSVersion != "" {
+		return event.ClientData.OSVersion
+	}
+
+	if event.ClientData.DeferredKey.OSVersion != "" {
+		return event.ClientData.DeferredKey.OSVersion
+	}
+
+	return ""
+}
+
 func NewWebApp(app *iris.Application, mp common.MessageProducer, logging common.Logging) (*WebApp, error) {
 	webapp := &WebApp{mp, logging}
 
-	// handle mobile event
+	// handle mobile event Receiver
 	app.Post("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleEventReceiverMobile)
 
-	// handle unsupported method
-	app.Delete("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleUnsupportedMethod)
-	app.Get("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleUnsupportedMethod)
-	app.Head("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleUnsupportedMethod)
-	app.Options("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleUnsupportedMethod)
-	app.Patch("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleUnsupportedMethod)
+	// handle web event Receiver
+	app.Post("/api/v2/apps/{app_name}/events/mobile-webapp/{event_category}", webapp.HandleEventReceiverWebApp)
+
+	// handle 404 error
+	app.OnErrorCode(iris.StatusNotFound, func(ctx iris.Context) {
+		WriteError(ctx, 404, "invalid request", "")
+	})
 
 	// handle health check
 	app.Get("/health-check", webapp.HandleHealthCheck)
