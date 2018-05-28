@@ -9,67 +9,9 @@ import (
 	"reflect"
 
 	iris "github.com/kataras/iris"
+	newrelic "github.com/newrelic/go-agent"
 	uuid "github.com/satori/go.uuid"
 )
-
-type EventLogKwargs struct {
-	AppID         *string     `json:"app_id"`
-	AppName       string      `json:"app_name"`
-	EventCategory int         `json:"event_category"`
-	DeviceUUID    string      `json:"device_uuid"`
-	Data          interface{} `json:"data"`
-}
-
-type EventLog struct {
-	WhatToDo      string         `json:"what_to_do"`
-	LogUUID       string         `json:"log_uuid"`
-	RecvTimestamp int64          `json:"recv_timestamp"`
-	Kwargs        EventLogKwargs `json:"kwargs"`
-}
-
-type MobileEvent struct {
-	SdkVersion       string `json:"sdkVersion"`
-	RequestTimestamp int    `json:"requestTimestamp"`
-	EventTimestamp   int    `json:"eventTimestamp"`
-	EventUUID        string `json:"eventUUID"`
-
-	ClientData struct {
-		OSVersion  string `json:"osVersion"`
-		DeviceType string `json:"deviceType"`
-
-		DeferredKey struct {
-			DeviceType string `json:"deviceType"`
-			OSVersion  string `json:"osVersion"`
-		}
-	}
-
-	Device struct {
-		DeviceModel string `json:"deviceModel"`
-		DeviceUUID  string `json:"deviceUUID"`
-		OSName      string `json:"osName"`
-		OSVersion   string `json:"osVersion"`
-	} `json:"device"`
-
-	Browser struct {
-		ClientID string `json:"clientID"`
-	} `json:"browser"`
-
-	EventData struct {
-		TransactionID string `json:"transactionID"`
-		ShortID       string `json:"shortID"`
-
-		TrackingData struct {
-			Channel string            `json:"channel"`
-			Params  map[string]string `json:"params"`
-		} `json:"trackingData"`
-	} `json:"eventData"`
-}
-
-type MobileEventResponse struct {
-	ResultMessage string      `json:"resultMessage"`
-	Resource      interface{} `json:"resource"`
-	At            string      `json:"at"`
-}
 
 const (
 	EXCEPTION_MSG_VALIDATION    = "Invalid request. Please RTFM. :P"
@@ -85,49 +27,12 @@ const (
 	AUTHORIZATION         = "Authorization"
 )
 
-func GetDeviceModel(event MobileEvent) string {
-	if event.Device.DeviceModel != "" {
-		return event.Device.DeviceModel
-	}
-
-	if event.ClientData.DeviceType != "" {
-		return event.ClientData.DeviceType
-	}
-
-	if event.ClientData.DeferredKey.DeviceType != "" {
-		return event.ClientData.DeferredKey.DeviceType
-	}
-
-	return ""
-}
-
-func GetOSVersion(event MobileEvent) string {
-	if event.Device.OSVersion != "" {
-		return event.Device.OSVersion
-	}
-
-	if event.ClientData.OSVersion != "" {
-		return event.ClientData.OSVersion
-	}
-
-	if event.ClientData.DeferredKey.OSVersion != "" {
-		return event.ClientData.DeferredKey.OSVersion
-	}
-
-	return ""
-}
-
-func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
-	txn, err := app.logging.NewTransaction()
+func (app *WebApp) HandleEventReceiverMobile(ic iris.Context) {
+	txn, _ := app.logging.NewTransaction()
 	defer txn.End()
 
-	if err != nil {
-		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, "newrelic error")
-	}
-
-	request := ic.Request()
-
 	// Authorization Header
+	request := ic.Request()
 	authorization := request.Header.Get(AUTHORIZATION)
 	if authorization == "" {
 		txn.AddAttribute("http-response-status-code", 401)
@@ -135,12 +40,29 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 		return
 	}
 
+	app.handleEvent(ic, txn)
+}
+
+func (app *WebApp) HandleEventReceiverWebApp(ic iris.Context) {
+	txn, _ := app.logging.NewTransaction()
+	defer txn.End()
+
+	app.handleEvent(ic, txn)
+}
+
+func (app *WebApp) HandleUnsupportedMethod(ic iris.Context) {
+	WriteError(ic, 400, EXCEPTION_MSG_UNSUPPORTED, "")
+}
+
+func (app *WebApp) handleEvent(ic iris.Context, txn newrelic.Transaction) {
+	request := ic.Request()
+	now := CurrentTimestamp()
+
 	rawData, err := ioutil.ReadAll(ic.Request().Body)
 	if err != nil && err != io.ErrUnexpectedEOF {
 		txn.NoticeError(err)
 		txn.AddAttribute("http-response-status-code", 500)
 		txn.AddAttribute("errer-stmt", err.Error())
-
 		WriteError(ic, 500, EXCEPTION_MSG_GENERAL, err.Error())
 		return
 	}
@@ -199,6 +121,9 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 		dm.SetMapIndex(reflect.ValueOf("clientIP"), reflect.ValueOf(clientIP))
 	}
 
+	// assign recvTimestamp
+	decoded["recvTimestamp"] = now
+
 	mobileEvent := MobileEvent{}
 	if err := json.Unmarshal(rawData, &mobileEvent); err != nil {
 		txn.NoticeError(err)
@@ -211,7 +136,7 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	payload := EventLog{
 		WhatToDo:      JOB_NAME_MOBILE_EVENT, // what_to_do
 		LogUUID:       logUUID.String(),      // log_uuid
-		RecvTimestamp: CurrentTimestamp(),    // recv_timestamp
+		RecvTimestamp: now,                   // recv_timestamp
 		Kwargs: EventLogKwargs{
 			AppID:         nil,
 			AppName:       appName,
@@ -255,8 +180,4 @@ func (app *WebApp) HandleMobileEventReceiver(ic iris.Context) {
 	txn.AddAttribute("http-response-status-code", 200)
 
 	log.Printf("[200][%s] app: %s, event_category: %d", clientIP, appName, eventCategory)
-}
-
-func (app *WebApp) HandleUnsupportedMethod(ic iris.Context) {
-	WriteError(ic, 400, EXCEPTION_MSG_UNSUPPORTED, "")
 }

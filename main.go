@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -9,6 +10,7 @@ import (
 
 	common "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/common"
 	webapp "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/webapp"
+	cors "github.com/iris-contrib/middleware/cors"
 	iris "github.com/kataras/iris"
 	tcplisten "github.com/valyala/tcplisten"
 )
@@ -16,12 +18,16 @@ import (
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
-	// config
-	production := len(os.Getenv("USE_AIRBRIDGE_LOCAL_DB")) == 0
+	debug := false
+	flag.BoolVar(&debug, "debug", false, "run server application on debug mode")
+	flag.Parse()
+
+	production := len(os.Getenv("USE_AIRBRIDGE_LOCAL_DB")) == 0 && !debug
 	if production == true {
 		log.Printf("running on production environment")
 	}
 
+	// config
 	config, err := LoadConfig(production)
 	if err != nil {
 		log.Fatalf("could not config load: %v", err)
@@ -37,6 +43,14 @@ func main() {
 		DeferAccept: true,
 		FastOpen:    true,
 	}
+
+	// allow all origins, allow methods: GET and POST
+	// crs := cors.New(cors.Options{
+	//   AllowedOrigins:   []string{"*"},
+	//   AllowCredentials: true,
+	// })
+	// app.UseGlobal(crs)
+	app.UseGlobal(cors.Default())
 
 	listener, err := listenerConfig.NewListener("tcp4", fmt.Sprintf(":%d", config.Server.Port))
 	if err != nil {
