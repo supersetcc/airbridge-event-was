@@ -133,10 +133,18 @@ func (app *WebApp) handleEvent(ic iris.Context, txn newrelic.Transaction) {
 		return
 	}
 
+	// generate kafka partition key
+	osVersion := GetOSVersion(mobileEvent)
+	deviceModel := GetDeviceModel(mobileEvent)
+	appSubdomain := appName
+	remoteAddr := clientIP
+	pk := GenerateKafkaPartitionKey(osVersion, deviceModel, appSubdomain, remoteAddr)
+
 	payload := EventLog{
 		WhatToDo:      JOB_NAME_MOBILE_EVENT, // what_to_do
 		LogUUID:       logUUID.String(),      // log_uuid
 		RecvTimestamp: now,                   // recv_timestamp
+		PartitionKey:  pk,                    // partition_key
 		Kwargs: EventLogKwargs{
 			AppID:         nil,
 			AppName:       appName,
@@ -145,13 +153,6 @@ func (app *WebApp) handleEvent(ic iris.Context, txn newrelic.Transaction) {
 			DeviceUUID:    mobileEvent.Device.DeviceUUID,
 		},
 	}
-
-	// generate kafka partition key
-	osVersion := GetOSVersion(mobileEvent)
-	deviceModel := GetDeviceModel(mobileEvent)
-	appSubdomain := appName
-	remoteAddr := clientIP
-	pk := GenerateKafkaPartitionKey(osVersion, deviceModel, appSubdomain, remoteAddr)
 
 	encoded, err := json.Marshal(payload)
 	if err != nil {

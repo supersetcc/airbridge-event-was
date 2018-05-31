@@ -22,6 +22,7 @@ type EventLog struct {
 	WhatToDo      string         `json:"what_to_do"`
 	LogUUID       string         `json:"log_uuid"`
 	RecvTimestamp int64          `json:"recv_timestamp"`
+	PartitionKey  string         `json:"partition_key"`
 	Kwargs        EventLogKwargs `json:"kwargs"`
 }
 
