@@ -14,9 +14,12 @@ const (
 	TestRequestDataPath = "../res/test/mobile_event_request_data.txt"
 )
 
-type MockEventReceiverLog struct {
-	WhatToDo string                 `json:"what_to_do"`
-	Kwargs   map[string]interface{} `json:"kwargs"`
+type mockEventReceiverLog struct {
+	WhatToDo      string                 `json:"what_to_do"`
+	LogUUID       string                 `json:"log_uuid"`
+	RecvTimestamp int64                  `json:"recv_timestamp"`
+	PartitionKey  string                 `json:"partition_key"`
+	Kwargs        map[string]interface{} `json:"kwargs"`
 }
 
 func readAllMockRequestPayload() []string {
@@ -91,13 +94,12 @@ func TestAppIDMustGetNullValue(t *testing.T) {
 		request.WithText(payload)
 		request.Expect().Status(httptest.StatusOK)
 
-		var log MockEventReceiverLog
+		var log mockEventReceiverLog
 		err := json.Unmarshal(mp.LastPublishedPayload, &log)
 		if err != nil {
 			t.Fatalf("could not parse queueing message: %v", err)
 		}
 
-		fmt.Println(string(mp.LastPublishedPayload))
 		if log.Kwargs["app_id"] != nil {
 			t.Fatalf("kwargs['app_id'] must have null value")
 		}
@@ -105,6 +107,36 @@ func TestAppIDMustGetNullValue(t *testing.T) {
 }
 
 func TestCheckDataResponseFormat(t *testing.T) {
+	payloads := readAllMockRequestPayload()
+	for _, payload := range payloads {
+
+		expect, mp := NewWebAppExpect(t)
+		uri := fmt.Sprintf("/api/v2/apps/%s/events/mobile-app/%d", "ablog", 9162)
+
+		request := expect.POST(uri).WithHeader("Authorization", "random-authorized-string")
+		request.WithText(payload)
+		request.Expect().Status(httptest.StatusOK)
+
+		var log mockEventReceiverLog
+		err := json.Unmarshal(mp.LastPublishedPayload, &log)
+		if err != nil {
+			t.Fatalf("could not parse queueing message: %v", err)
+		}
+
+		if log.LogUUID == "" {
+			t.Fatalf("log_uuid is not setted")
+		}
+
+		if log.PartitionKey == "" {
+			t.Fatalf("partition_key is not setted")
+		}
+
+		if log.RecvTimestamp == 0 {
+			t.Fatalf("recv_timestamp is not setted")
+		}
+
+	}
+
 }
 
 func TestReqestPayloadLessThan512Bytes(t *testing.T) {
