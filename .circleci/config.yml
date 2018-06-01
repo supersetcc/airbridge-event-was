@@ -33,5 +33,5 @@ jobs:
               --source /go/src/bitbucket.org/teamteheranslippers/airbridge-go-bypass-was
               aws deploy create-deployment --application-name airbridge-go-bypass-was \
               --s3-location bucket=airbridge-application-source,key=airbridge-go-bypass-was,bundleType=zip \
-              --deployment-group-name airbridge-go-bypass-was-group
+              --deployment-group-name airbridge-go-bypass-was-on-demand-group
             fi
