@@ -107,9 +107,13 @@ func NewWebApp(app *iris.Application, mp common.MessageProducer, logging common.
 
 	// handle mobile event Receiver
 	app.Post("/api/v2/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleEventReceiverMobile)
+	app.Post("/api/v3/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleEventReceiverMobile)
+	app.Post("/api/v3.1/apps/{app_name}/events/mobile-app/{event_category}", webapp.HandleEventReceiverMobile)
 
 	// handle web event Receiver
 	app.Post("/api/v2/apps/{app_name}/events/mobile-webapp/{event_category}", webapp.HandleEventReceiverWebApp)
+	app.Post("/api/v3/apps/{app_name}/events/mobile-webapp/{event_category}", webapp.HandleEventReceiverWebApp)
+	app.Post("/api/v3.1/apps/{app_name}/events/mobile-webapp/{event_category}", webapp.HandleEventReceiverWebApp)
 
 	// handle 404 error
 	app.OnErrorCode(iris.StatusNotFound, func(ctx iris.Context) {
