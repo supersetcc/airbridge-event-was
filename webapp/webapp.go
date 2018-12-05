@@ -1,7 +1,7 @@
 package webapp
 
 import (
-	"github.com/ab180/airbridge-go-bypass-was/common"
+	"github.com/ab180/airbridge-event-was/common"
 	"github.com/kataras/iris"
 )
 
