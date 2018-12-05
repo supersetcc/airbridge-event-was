@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	common "github.com/ab180/airbridge-go-bypass-was/common"
-	webapp "github.com/ab180/airbridge-go-bypass-was/webapp"
+	common "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/common"
+	webapp "bitbucket.org/teamteheranslippers/airbridge-go-bypass-was/webapp"
 	cors "github.com/iris-contrib/middleware/cors"
 	iris "github.com/kataras/iris"
 	tcplisten "github.com/valyala/tcplisten"
