@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	common "github.com/ab180/airbridge-event-was/common"
-	webapp "github.com/ab180/airbridge-event-was/webapp"
+	common "github.com/ab180/airbridge-go-bypass-was/common"
+	webapp "github.com/ab180/airbridge-go-bypass-was/webapp"
 	cors "github.com/iris-contrib/middleware/cors"
 	iris "github.com/kataras/iris"
 	tcplisten "github.com/valyala/tcplisten"
@@ -74,7 +74,7 @@ func main() {
 
 	// to support graceful shutdown, iris support to catch a Interrupt
 	iris.RegisterOnInterrupt(func() {
-		log.Printf("shutdown airbridge-event-was")
+		log.Printf("shutdown airbridge-go-bypass-was")
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 		defer cancel()

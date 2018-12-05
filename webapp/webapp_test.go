@@ -3,7 +3,7 @@ package webapp
 import (
 	"testing"
 
-	"github.com/ab180/airbridge-event-was/common"
+	"github.com/ab180/airbridge-go-bypass-was/common"
 	"github.com/iris-contrib/httpexpect"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/httptest"
